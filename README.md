@@ -50,7 +50,7 @@ you can just use quickfix as with a normal Makefile project.
 With [pathogen.vim](https://github.com/tpope/vim-pathogen) simply copy and paste:
 
     cd ~/.vim/bundle
-    git clone git://github.com/vhdirk/vim-cmake.git
+    git clone git://github.com/Squareys/vim-cmake.git
 
 Once help tags have been generated, you can view the manual with
 `:help cmake`.
@@ -59,7 +59,7 @@ Once help tags have been generated, you can view the manual with
 
 With [Vundle.vim](https://github.com/VundleVim/Vundle.vim) simply add this repository to your plugins list:
 
-    Plugin 'vhdirk/vim-cmake'
+    Plugin 'Squareys/vim-cmake'
 
 ## Acknowledgements
 
@@ -78,4 +78,6 @@ With [Vundle.vim](https://github.com/VundleVim/Vundle.vim) simply add this repos
 ## License
 
 Copyright (c) Dirk Van Haerenborgh, @SteveDeFacto. Distributed under the same terms as Vim itself.
+Copyright (c) Jonathan Hale, @Squareys. Distributed under the same terms as Vim itself.
+
 See `:help license`.
