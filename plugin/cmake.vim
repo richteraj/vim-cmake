@@ -144,7 +144,7 @@ function! s:cmake(...)
     return
   endif
 
-  let &makeprg = 'cmake --build ' . shellescape(b:build_dir) . ' --target'
+  let &makeprg = 'cmake --build ' . s:fnameescape(b:build_dir) . ' --target'
   call s:cmake_configure()
 endfunction
 
