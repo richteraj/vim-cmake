@@ -109,7 +109,7 @@ function! s:cmake_configure()
   " Create symbolic link to compilation database for use with YouCompleteMe
   if g:cmake_ycm_symlinks && filereadable("compile_commands.json")
     if has("win32")
-      exec "mklink" "../compile_commands.json" "compile_commands.json"
+      silent echo system("mklink ../compile_commands.json " . s:fnameescape(b:build_dir) . "/compile_commands.json")
     else
       silent echo system("ln -s " . s:fnameescape(b:build_dir) ."/compile_commands.json ../compile_commands.json")
     endif
