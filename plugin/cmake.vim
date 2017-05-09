@@ -135,7 +135,9 @@ command! CMakeClean call s:cmakeclean()
 command! CMakeFindBuildDir call s:cmake_find_build_dir()
 
 function! s:cmake_find_build_dir()
-  unlet b:build_dir
+  if exists("b:build_dir")
+      unlet b:build_dir
+  endif
   call s:find_build_dir()
 endfunction
 
