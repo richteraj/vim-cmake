@@ -63,3 +63,20 @@ Expect:
 
   Hello World
   Bye World
+
+Execute (Configure by passing addition arguments to :CMake):
+  cd test\ project/tmp-build
+  e ../CMakeLists.txt
+  CMake -DWITH_BYE=ON
+  silent make
+
+  enew
+  if has("win32") || has("win32unix")
+    read !Debug/hello.exe
+  else
+    read !./hello
+  endif
+Expect:
+
+  Hello World
+  Bye World
