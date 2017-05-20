@@ -74,6 +74,7 @@ With [Vundle.vim](https://github.com/VundleVim/Vundle.vim) simply add this repos
     * @jmirabel for fixing concatenation of cmake arguments.
     * @T4ng10r for the project generator option.
     * @Squareys for a small overhaul of the project, the initial test and travis setup.
+    * @darth for fixing passing arguments to CMake command
 
 ## License
 

@@ -66,7 +66,7 @@ endfunction
 "   * CMAKE_CXX_COMPILER
 "   * CMAKE_C_COMPILER
 "   * The generator (-G)
-function! s:cmake_configure()
+function! s:cmake_configure(...)
   exec 'cd' s:fnameescape(b:build_dir)
 
   let l:argument = []
@@ -147,7 +147,7 @@ function! s:cmake(...)
   endif
 
   let &makeprg = 'cmake --build ' . s:fnameescape(b:build_dir) . ' --target'
-  call s:cmake_configure()
+  call call('s:cmake_configure', a:000)
 endfunction
 
 function! s:cmakeclean()
