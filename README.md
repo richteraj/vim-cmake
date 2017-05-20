@@ -2,10 +2,8 @@
 [![Travis (Linux)](https://travis-ci.org/Squareys/vim-cmake.svg?branch=master)](https://travis-ci.org/Squareys/vim-cmake)
 [![AppVeyor (Windows)](https://ci.appveyor.com/api/projects/status/8x1tk0wbu4564m43?svg=true)](https://ci.appveyor.com/project/Squareys/vim-cmake)
 
-vim-cmake is a Vim plugin to make working with CMake a little nicer.
-
-I got tired of navigating to the build directory each time, and I also
-disliked setting makeprg manually each time. This plugin does just that.
+[vim-cmake](https://github.com/Squareys/vim-cmake) is a Vim plugin to make working with CMake a lot more convenient.
+This project was originally forked from [vhdirk/vim-cmake](https://github.com/vhdirk/vim-cmake).
 
 ## Usage
 
@@ -60,6 +58,24 @@ Once help tags have been generated, you can view the manual with
 With [Vundle.vim](https://github.com/VundleVim/Vundle.vim) simply add this repository to your plugins list:
 
     Plugin 'Squareys/vim-cmake'
+
+## Contributing
+
+If you find bugs or annoyances while using vim-cmake, go ahead and open an [issue](https://github.com/Squareys/vim-cmake/issues), or fix it yourself and open a [pullrequest](https://github.com/Squareys/vim-cmake/pulls).
+
+### Running tests
+
+vim-cmake uses [vader.vim](https://github.com/junegunn/vader.vim) for testing. To run the tests you will need to clone the repository into the root of this project:
+
+```
+# Clone the repo, note: on unix make sure the created folder is lowercase!
+git clone https://github.com/junegunn/vader.vim
+
+# Run tests
+vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
+```
+
+For test file syntax highlighting, add vader.vim as a plugin to your .vimrc.
 
 ## Acknowledgements
 
