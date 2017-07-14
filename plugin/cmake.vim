@@ -26,6 +26,13 @@ if !executable("cmake")
   finish
 endif
 
+" CMake error rudimentary parsing
+let s:cmake_errors = []
+let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
+let s:cmake_errors += ['CMake %trror at %f:%l:']
+let s:cmake_errors += ['CMake %trror in %f:']
+let &errorformat .= ',' . join(s:cmake_errors, ',')
+
 function! s:find_build_dir()
   " Do not overwrite already found build_dir, may be set explicitly
   " by user.
