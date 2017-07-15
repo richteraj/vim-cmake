@@ -31,6 +31,7 @@ let s:cmake_errors = []
 let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
 let s:cmake_errors += ['CMake %trror at %f:%l:']
 let s:cmake_errors += ['CMake %trror in %f:']
+let s:cmake_errors += ['CMake %trror: %m']
 let &errorformat .= ',' . join(s:cmake_errors, ',')
 
 function! s:find_build_dir()
