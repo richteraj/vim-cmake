@@ -75,12 +75,11 @@ endfunction
 "   * CMAKE_C_COMPILER
 "   * The generator (-G)
 function! s:cmake_configure(...)
-  exec 'cd' s:fnameescape(b:build_dir)
 
   let l:argument = []
   " Only change values of variables, if project is not configured
   " already, otherwise we overwrite existing configuration.
-  let l:configured = filereadable("CMakeCache.txt")
+  let l:configured = filereadable(b:build_dir ."CMakeCache.txt")
 
   if !l:configured
     if exists("g:cmake_project_generator")
@@ -109,10 +108,25 @@ function! s:cmake_configure(...)
 
   let l:argumentstr = join(l:argument, " ")
 
-  let s:cmd = 'cmake .. '. l:argumentstr . " " . join(a:000)
+  exec 'cd' s:fnameescape(b:proj_dir)
+  let l:mp = &makeprg
+
+  " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
+  " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
+  " `build.ninja`.
+  " Those options are internal command line options of CMake and therefore
+  " *undocumented* (working with CMake v3.7.2)
+  let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
+  let s:cmd .= l:argumentstr . ' ' . join(a:000)
+  let &makeprg = s:cmd
+
   echo s:cmd
-  silent let s:res = system(s:cmd)
-  silent echo s:res
+  silent make
+
+  let &makeprg = l:mp
+  exec 'cd -'
+
+  exec 'cd' s:fnameescape(b:build_dir)
 
   " Create symbolic link to compilation database for use with YouCompleteMe
   if g:cmake_ycm_symlinks && filereadable("compile_commands.json")
