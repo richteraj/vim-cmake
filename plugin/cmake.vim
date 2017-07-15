@@ -20,19 +20,24 @@ endif
 if !exists("g:cmake_ycm_symlinks")
   let g:cmake_ycm_symlinks = 0
 endif
+if !exists("g:cmake_config_in_quickfix")
+  let g:cmake_config_in_quickfix = 0
+endif
 
 if !executable("cmake")
   echoerr "vim-cmake requires cmake executable. Please make sure it is installed and on PATH."
   finish
 endif
 
-" CMake error rudimentary parsing
-let s:cmake_errors = []
-let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
-let s:cmake_errors += ['CMake %trror at %f:%l:']
-let s:cmake_errors += ['CMake %trror in %f:']
-let s:cmake_errors += ['CMake %trror: %m']
-let &errorformat .= ',' . join(s:cmake_errors, ',')
+if g:cmake_config_in_quickfix
+  " CMake error rudimentary parsing
+  let s:cmake_errors = []
+  let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
+  let s:cmake_errors += ['CMake %trror at %f:%l:']
+  let s:cmake_errors += ['CMake %trror in %f:']
+  let s:cmake_errors += ['CMake %trror: %m']
+  let &errorformat .= ',' . join(s:cmake_errors, ',')
+endif
 
 function! s:find_build_dir()
   " Do not overwrite already found build_dir, may be set explicitly
@@ -109,23 +114,30 @@ function! s:cmake_configure(...)
 
   let l:argumentstr = join(l:argument, " ")
 
-  exec 'cd' s:fnameescape(b:proj_dir)
-  let l:mp = &makeprg
+  if g:cmake_config_in_quickfix
+    exec 'cd' s:fnameescape(b:proj_dir)
+    let l:mp = &makeprg
 
-  " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
-  " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
-  " `build.ninja`.
-  " Those options are internal command line options of CMake and therefore
-  " *undocumented* (working with CMake v3.7.2)
-  let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
-  let s:cmd .= l:argumentstr . ' ' . join(a:000)
-  let &makeprg = s:cmd
+    " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
+    " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
+    " `build.ninja`.
+    " Those options are internal command line options of CMake and therefore
+    " *undocumented* (working with CMake v3.7.2)
+    let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
+    let s:cmd .= l:argumentstr . ' ' . join(a:000)
+    let &makeprg = s:cmd
 
-  echo s:cmd
-  silent make
+    echo s:cmd
+    silent make
 
-  let &makeprg = l:mp
-  exec 'cd -'
+    let &makeprg = l:mp
+    exec 'cd -'
+  else
+    let s:cmd = 'cmake .. '. l:argumentstr . " " . join(a:000)
+    echo s:cmd
+    silent let s:res = system(s:cmd)
+    silent echo s:res
+  endif
 
   exec 'cd' s:fnameescape(b:build_dir)
 
