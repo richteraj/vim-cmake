@@ -52,6 +52,7 @@ function! s:find_build_dir()
     " expand() would expand "" to working directory, but we need
     " this as an indicator that build was not found
     let b:build_dir = fnamemodify(b:build_dir, ':p')
+    let b:proj_dir = fnamemodify(b:build_dir, ':p:h:h')
     echom "Found cmake build directory: " . s:fnameescape(b:build_dir)
     return 1
   else
@@ -141,6 +142,8 @@ command! -nargs=? CMake call s:cmake(<f-args>)
 command! CMakeClean call s:cmakeclean()
 command! CMakeFindBuildDir call s:cmake_find_build_dir()
 
+command! -nargs=? CMakeCDMake call s:cd_make(<f-args>)
+
 function! s:cmake_find_build_dir()
   if exists("b:build_dir")
       unlet b:build_dir
@@ -166,3 +169,12 @@ function! s:cmakeclean()
   echom "Build directory has been cleaned."
 endfunction
 
+function! s:cd_make(...)
+  if !s:find_build_dir()
+    return
+  endif
+
+  exec 'cd' s:fnameescape(b:proj_dir)
+  exec 'make '. join(a:000)
+  exec 'cd -'
+endfunction
