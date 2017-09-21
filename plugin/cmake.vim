@@ -133,10 +133,12 @@ function! s:cmake_configure(...)
     let &makeprg = l:mp
     exec 'cd -'
   else
+    exec 'cd' s:fnameescape(b:build_dir)
     let s:cmd = 'cmake .. '. l:argumentstr . " " . join(a:000)
     echo s:cmd
     silent let s:res = system(s:cmd)
     silent echo s:res
+    exec 'cd -'
   endif
 
   exec 'cd' s:fnameescape(b:build_dir)
