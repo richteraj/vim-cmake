@@ -1,0 +1,60 @@
+Before:
+  " This variable has to bet set before loading plugins, i.e. inside a vimrc
+  " file
+  " let g:cmake_config_in_quickfix = 1
+
+  " Ensure we are in the test directory
+  if isdirectory("test")
+    cd test
+  endif
+
+  if !exists("test_dir")
+    let test_dir = fnamemodify(getcwd(), ':p')
+  endif
+
+  let test_proj_dir = "test project_bad_cmake"
+  let g:cmake_build_dir = "tmp-build"
+  let test_build_dir = test_proj_dir."/".g:cmake_build_dir
+
+  Assert !isdirectory(test_build_dir),
+    \ "TEST ERROR: build directory was not properly deleted"
+  echo system("mkdir '".test_build_dir."'")
+  Assert isdirectory(test_build_dir),
+    \ "TEST ERROR: build directory was not created"
+  Assert !filereadable(test_proj_dir . "/.CMakeLists.txt.swp"),
+    \ "TEST ERROR: swap file of CMakeLists.txt exists"
+
+After:
+  exec "cd" fnameescape(test_dir)
+  echo system("rm -rf '".test_build_dir."'")
+
+
+Execute (:CMake jumps to error in CMakeLists.txt file):
+  exec "cd" fnameescape(test_proj_dir)
+  CMake
+  cc!
+Then:
+  AssertEqual expand('%:p'), fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt",
+    \ ":cc did not open ".fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt but ".expand("%:p")
+Expect:
+  cmake_minimum_required(VERSION 2.8.12)
+  
+  projec(Syntax_Error)
+
+
+Execute (:CMake jumps to error in CMakeLists.txt file from arbitrary directory):
+  exec "cd" fnameescape(test_proj_dir)
+  CMakeFindBuildDir
+  exec "cd" fnameescape(test_dir)
+  cd ..
+  CMake
+  cc!
+Then:
+  AssertEqual expand('%:p'), fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt",
+    \ ":cc did not open ".fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt but ".expand("%:p")
+  Assert isdirectory("test"), ":CMake did not properly reset working directory"
+Expect:
+  cmake_minimum_required(VERSION 2.8.12)
+  
+  projec(Syntax_Error)
+
