@@ -132,6 +132,12 @@ function! s:cmake_configure(...)
 
     let &makeprg = l:mp
     exec 'cd -'
+
+    " If there were make errors another buffer might get opened, therefore
+    " setting "b:build_dir" again
+    if !s:find_build_dir()
+      return
+    endif
   else
     exec 'cd' s:fnameescape(b:build_dir)
     let s:cmd = 'cmake .. '. l:argumentstr . " " . join(a:000)
