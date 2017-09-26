@@ -11,8 +11,9 @@ addons:
     - g++-4.7
     - cmake
 
-before_script: |
-  git clone https://github.com/junegunn/vader.vim.git
+before_script:
+  - git clone https://github.com/junegunn/vader.vim.git
+  - cmake --version
 
 script:
     - vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
