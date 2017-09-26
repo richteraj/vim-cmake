@@ -16,5 +16,5 @@ before_script: |
 
 script:
     - vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
-    # - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake.vader'
-    - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake_quickfix.vader'
+    - vim -Nu 'test/.vimrc' -c 'let g:cmake_config_in_quickfix = 1 | Vader! test/cmake.vader'
+    - vim -Nu 'test/.vimrc' -c 'let g:cmake_config_in_quickfix = 1 | Vader! test/cmake_quickfix.vader'

@@ -1,9 +1,0 @@
-filetype off
-
-set rtp+=vader.vim
-set rtp+=.
-filetype plugin indent on
-syntax enable
-
-let g:cmake_config_in_quickfix = 1
-
