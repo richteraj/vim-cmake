@@ -38,7 +38,7 @@ Then:
     \ ":cc did not open ".fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt but ".expand("%:p")
 Expect:
   cmake_minimum_required(VERSION 2.8.12)
-  
+
   projec(Syntax_Error)
 
 
@@ -55,6 +55,6 @@ Then:
   Assert isdirectory("test"), ":CMake did not properly reset working directory"
 Expect:
   cmake_minimum_required(VERSION 2.8.12)
-  
+
   projec(Syntax_Error)
 
