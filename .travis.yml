@@ -15,6 +15,6 @@ before_script: |
   git clone https://github.com/junegunn/vader.vim.git
 
 script:
-    # - vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
-    - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake.vader' </dev/zero
-    # - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake_quickfix.vader'
+    - vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
+    # - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake.vader'
+    - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake_quickfix.vader'
