@@ -8,3 +8,5 @@ install:
 
 build_script:
   - vim -Nu test/.vimrc -c 'Vader! test/cmake.vader' --not-a-term
+  - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake.vader'
+  - vim -Nu 'test/.vimrc_with_quickfix' -c 'Vader! test/cmake_quickfix.vader'
