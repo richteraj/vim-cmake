@@ -51,7 +51,7 @@ Execute (Open already configured cmake project):
   silent !cmake .. -DWITH_BYE=ON
   e ../CMakeLists.txt
   CMake
-  silent make!
+  silent make
 
   enew
   if has("win32") || has("win32unix")
@@ -68,7 +68,7 @@ Execute (Configure by passing addition arguments to :CMake):
   cd test\ project/tmp-build
   e ../CMakeLists.txt
   CMake -DWITH_BYE=ON
-  silent make!
+  silent make
 
   enew
   if has("win32") || has("win32unix")
