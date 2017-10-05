@@ -50,8 +50,15 @@ Execute (Open already configured cmake project):
   cd test\ project/tmp-build
   silent !cmake .. -DWITH_BYE=ON
   e ../CMakeLists.txt
-  CMake
-  silent make
+  if v:version == 704 && g:cmake_config_in_quickfix
+    let g:cmake_config_in_quickfix = 0
+    CMake
+    silent make
+    let g:cmake_config_in_quickfix = 1
+  else
+    CMake
+    silent make
+  endif
 
   enew
   if has("win32") || has("win32unix")
@@ -67,8 +74,15 @@ Expect:
 Execute (Configure by passing addition arguments to :CMake):
   cd test\ project/tmp-build
   e ../CMakeLists.txt
-  CMake -DWITH_BYE=ON
-  silent make
+  if v:version == 704 && g:cmake_config_in_quickfix
+    let g:cmake_config_in_quickfix = 0
+    CMake -DWITH_BYE=ON
+    silent make
+    let g:cmake_config_in_quickfix = 1
+  else
+    CMake -DWITH_BYE=ON
+    silent make
+  endif
 
   enew
   if has("win32") || has("win32unix")
