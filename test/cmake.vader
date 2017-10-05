@@ -52,7 +52,6 @@ Execute (Open already configured cmake project):
   e ../CMakeLists.txt
   CMake
   silent make!
-  Assert 0, join(getqflist(), ';')
 
   enew
   if has("win32") || has("win32unix")
@@ -70,7 +69,6 @@ Execute (Configure by passing addition arguments to :CMake):
   e ../CMakeLists.txt
   CMake -DWITH_BYE=ON
   silent make!
-  Assert 0, join(getqflist(), ';')
 
   enew
   if has("win32") || has("win32unix")
