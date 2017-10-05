@@ -49,7 +49,7 @@ Execute (Create symlink to compilation database):
 Execute (Open already configured cmake project):
   cd test\ project/tmp-build
   silent !cmake .. -DWITH_BYE=ON
-  e ../CMakeLists.txt
+  e ../main.cpp
   CMake
   silent make!
   Assert 0, join(getqflist(), ';')
@@ -67,7 +67,7 @@ Expect:
 
 Execute (Configure by passing addition arguments to :CMake):
   cd test\ project/tmp-build
-  e ../CMakeLists.txt
+  e ../main.cpp
   CMake -DWITH_BYE=ON
   silent make!
   Assert 0, join(getqflist(), ';')
