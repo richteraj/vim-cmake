@@ -36,6 +36,31 @@ let s:cmake_errors += ['CMake %trror in %f:']
 let s:cmake_errors += ['CMake %trror: %m']
 let &errorformat .= ',' . join(s:cmake_errors, ',')
 
+function! s:search_upward_for(name, in)
+  " Searches upwards from "in" directory until a:name is found
+  return finddir(a:name, a:in.';')
+endfunction
+
+function! s:create_compile_commands_symlink()
+    if has("win32")
+      silent echo system("mklink ../compile_commands.json " . b:build_dir . "/compile_commands.json")
+    else
+      silent echo system("ln -s " . b:build_dir ."/compile_commands.json ../compile_commands.json")
+    endif
+endfunction
+
+function! s:run_as_makeprg(cmd)
+    " for restoring later
+    let makeprg_backup = &makeprg
+
+    " run our command as makeprg
+    let &makeprg = a:cmd
+    silent make
+
+    " restore old makeprg command
+    let &makeprg = makeprg_backup
+endfunction
+
 function! s:find_build_dir()
   " Do not overwrite already found build_dir, may be set explicitly
   " by user.
@@ -44,23 +69,26 @@ function! s:find_build_dir()
   endif
 
   let g:cmake_build_dir = get(g:, 'cmake_build_dir', 'build')
-  let b:build_dir = finddir(g:cmake_build_dir, ';')
+  let b:build_dir = s:search_upward_for(g:cmake_build_dir, "")
 
   if b:build_dir == ""
     " Find build directory in path of current file
-    let b:build_dir = finddir(g:cmake_build_dir, s:fnameescape(expand("%:p:h")) . ';')
+    let b:build_dir = s:search_upward_for(g:cmake_build_dir, s:fnameescape(expand("%:p:h")))
   endif
 
   if b:build_dir != ""
     " expand() would expand "" to working directory, but we need
     " this as an indicator that build was not found
-    let b:build_dir = substitute(fnamemodify(b:build_dir, ':p'), "\\", "/", "g")
-    let b:proj_dir = substitute(fnamemodify(b:build_dir, ':p:h:h'), "\\", "/", "g")
-    echom "Found cmake build directory: " . s:fnameescape(b:build_dir)
-    echom "Found cmake project directory: " . s:fnameescape(b:proj_dir)
+    let tmp = b:build_dir
+    let b:build_dir = fnamemodify(tmp, ':p:h')
+    let b:proj_dir = fnamemodify(tmp, ':p:h:h')
+
+    echom "Found cmake build directory: " . b:build_dir
+    echom "Found cmake project directory: " . b:proj_dir
 
     return 1
   else
+    unlet b:build_dir
     echom "Unable to find cmake build directory."
     return 0
   endif
@@ -113,19 +141,18 @@ function! s:cmake_configure(...)
 
   let l:argumentstr = join(l:argument, " ")
 
-  exec 'cd' s:fnameescape(b:proj_dir)
+  exec 'cd '.s:fnameescape(b:proj_dir)
 
   " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
   " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
   " `build.ninja`.
   " Those options are internal command line options of CMake and therefore
   " *undocumented* (working with CMake v3.7.2)
-  let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
-
+  let s:cmd = 'cmake -H"'. b:proj_dir .'" -B"'. b:build_dir .'" '
   let s:cmd .= l:argumentstr . ' ' . join(a:000)
   echo s:cmd
-  silent let s:res = system(s:cmd)
-  silent echo s:res
+  call s:run_as_makeprg(s:cmd)
+  "silent echo s:res
 
   exec 'cd -'
 
@@ -135,15 +162,11 @@ function! s:cmake_configure(...)
       return
   endif
 
-  exec 'cd' s:fnameescape(b:build_dir)
+  exec 'cd '.s:fnameescape(b:build_dir)
 
   " Create symbolic link to compilation database for use with YouCompleteMe
   if g:cmake_ycm_symlinks && filereadable("compile_commands.json")
-    if has("win32")
-      silent echo system("mklink ../compile_commands.json " . s:fnameescape(b:build_dir) . "/compile_commands.json")
-    else
-      silent echo system("ln -s " . s:fnameescape(b:build_dir) ."/compile_commands.json ../compile_commands.json")
-    endif
+    s:create_compile_commands_symlink()
     echom "Created symlink to compilation database"
   endif
 
@@ -153,7 +176,9 @@ endfunction
 " Utility function
 " Thanks to tpope/vim-fugitive
 function! s:fnameescape(file) abort
-  if exists('*fnameescape')
+  " Because of https://github.com/vim/vim/issues/541, we escape manually on
+  " windows.
+  if exists('*fnameescape') && !has("win32")
     return fnameescape(a:file)
   else
     return escape(a:file," \t\n*?[{`$\\%#'\"|!<")
@@ -180,9 +205,8 @@ function! s:cmake(...)
   endif
 
   " CMake outputs errors relative to project directory. We therefore tell
-  let &makeprg = '((echo CMake enter dir: ' . s:fnameescape(b:proj_dir) . ')'
-  let &makeprg .= '&& cmake --build "' . s:fnameescape(b:build_dir) . '" --target $*)'
-  "let &makeprg .= '&& (echo CMake leave dir: ' . s:fnameescape(b:proj_dir) . ')'
+  let &makeprg = '((echo CMake enter dir: ' . b:proj_dir . ')'
+  let &makeprg .= '&& cmake --build "' . b:build_dir . '" --target $*)'
   call call('s:cmake_configure', a:000)
 endfunction
 
@@ -191,7 +215,7 @@ function! s:cmakeclean()
     return
   endif
 
-  silent echo system("rm -r '" . b:build_dir. "'/*")
+  silent echo system("rm -r '" . b:build_dir. "/*'")
   echom "Build directory has been cleaned."
 endfunction
 
@@ -200,7 +224,7 @@ function! s:cd_make(...)
     return
   endif
 
-  exec 'cd' s:fnameescape(b:proj_dir)
+  exec 'cd' b:proj_dir
   exec 'make '. join(a:000)
   exec 'cd -'
 endfunction
