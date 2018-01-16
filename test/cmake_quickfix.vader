@@ -17,7 +17,7 @@ Before:
   let test_build_dir = test_proj_dir."/".g:cmake_build_dir
 
   Assert !isdirectory(test_build_dir),
-    \ "TEST ERROR: build directory was not properly deleted"
+    \ "TEST ERROR: build directory '".test_build_dir."' was not properly deleted"
   echo system("mkdir '".test_build_dir."'")
   Assert isdirectory(test_build_dir),
     \ "TEST ERROR: build directory was not created"
