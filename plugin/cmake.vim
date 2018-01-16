@@ -152,7 +152,6 @@ function! s:cmake_configure(...)
   let s:cmd .= l:argumentstr . ' ' . join(a:000)
   echo s:cmd
   call s:run_as_makeprg(s:cmd)
-  "silent echo s:res
 
   exec 'cd -'
 
