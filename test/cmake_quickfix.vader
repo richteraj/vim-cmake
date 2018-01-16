@@ -1,8 +1,4 @@
 Before:
-  " This variable has to bet set before loading plugins, i.e. inside a vimrc
-  " file
-  " let g:cmake_config_in_quickfix = 1
-
   " Ensure we are in the test directory
   if isdirectory("test")
     cd test
@@ -12,30 +8,38 @@ Before:
     let test_dir = fnamemodify(getcwd(), ':p')
   endif
 
-  let test_proj_dir = "test project_bad_cmake"
   let g:cmake_build_dir = "tmp-build"
-  let test_build_dir = test_proj_dir."/".g:cmake_build_dir
 
-  Assert !isdirectory(test_build_dir),
-    \ "TEST ERROR: build directory '".test_build_dir."' was not properly deleted"
-  echo system("mkdir '".test_build_dir."'")
-  Assert isdirectory(test_build_dir),
+  Assert !isdirectory("test project_bad_cmake/tmp-build"),
+    \ "TEST ERROR: build directory 'test project_bad_cmake/tmp-build' was not properly deleted"
+  if has("win32")
+    echo system('mkdir "test project_bad_cmake\\tmp-build"')
+  else
+    echo system("mkdir 'test project_bad_cmake/tmp-build'")
+  endif
+  Assert isdirectory("test project_bad_cmake/tmp-build"),
     \ "TEST ERROR: build directory was not created"
-  Assert !filereadable(test_proj_dir . "/.CMakeLists.txt.swp"),
+  Assert !filereadable("test project_bad_cmake/.CMakeLists.txt.swp"),
     \ "TEST ERROR: swap file of CMakeLists.txt exists"
 
 After:
   exec "cd" fnameescape(test_dir)
-  echo system("rm -rf '".test_build_dir."'")
+  if has("win32")
+    echo system('rmdir /S/Q "test project_bad_cmake\tmp-build"')
+    echo system('del /Q "test project_bad_cmake\compile_commands.json"')
+  else
+    echo system("rm -rf 'test project_bad_cmake/tmp-build'")
+    echo system("rm -f 'test project_bad_cmake/compile_commands.json'")
+  endif
 
 
 Execute (:CMake jumps to error in CMakeLists.txt file):
-  exec "cd" fnameescape(test_proj_dir)
+  cd test\ project_bad_cmake
   CMake
   cc!
 Then:
-  AssertEqual expand('%:p'), fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt",
-    \ ":cc did not open ".fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt but ".expand("%:p")
+  AssertEqual expand('%:p'), fnamemodify(test_dir."test\ project_bad_cmake", ":p")."CMakeLists.txt",
+    \ ":cc did not open ".fnamemodify(test_dir."test\ project_bad_cmake", ":p")."CMakeLists.txt but ".expand("%:p")
 Expect:
   cmake_minimum_required(VERSION 2.8.12)
 
@@ -43,15 +47,15 @@ Expect:
 
 
 Execute (:CMake jumps to error in CMakeLists.txt file from arbitrary directory):
-  exec "cd" fnameescape(test_proj_dir)
+  cd test\ project_bad_cmake
   CMakeFindBuildDir
   exec "cd" fnameescape(test_dir)
   cd ..
   CMake
   cc!
 Then:
-  AssertEqual expand('%:p'), fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt",
-    \ ":cc did not open ".fnamemodify(test_dir.test_proj_dir, ":p")."CMakeLists.txt but ".expand("%:p")
+  AssertEqual expand('%:p'), fnamemodify(test_dir."test\ project_bad_cmake", ":p")."CMakeLists.txt",
+    \ ":cc did not open ".fnamemodify(test_dir."test\ project_bad_cmake", ":p")."CMakeLists.txt but ".expand("%:p")
   Assert isdirectory("test"), ":CMake did not properly reset working directory"
 Expect:
   cmake_minimum_required(VERSION 2.8.12)

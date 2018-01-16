@@ -9,8 +9,13 @@ Before:
   endif
 
   Assert !isdirectory("test project/tmp-build"), "TEST ERROR: build directory was not properly deleted"
-  echo system("mkdir 'test project/tmp-build'")
-  Assert isdirectory("test project/tmp-build"), "TEST ERROR: build directory was not created"
+  if has("win32")
+    echo system('mkdir "test project\\tmp-build"')
+  else
+    echo system("mkdir 'test project/tmp-build'")
+  endif
+  Assert isdirectory("test project/tmp-build"),
+    \ "TEST ERROR: build directory was not created"
 
   " Under travis CI the entire project is in a build/ directory
   " which will make the search from cwd always return a result.
@@ -19,8 +24,13 @@ Before:
   let g:cmake_build_dir = "tmp-build"
 After:
   exec "cd" fnameescape(test_dir)
-  echo system("rm -rf 'test project/tmp-build'")
-  echo system("rm -f 'test project/compile_commands.json'")
+  if has("win32")
+    echo system('rmdir /S/Q "test project\tmp-build"')
+    echo system('del /Q "test project\compile_commands.json"')
+  else
+    echo system("rm -rf 'test project/tmp-build'")
+    echo system("rm -f 'test project/compile_commands.json'")
+  endif
 
 Execute (Find build directory from working dir):
   cd test\ project
@@ -30,9 +40,12 @@ Execute (Find build directory from working dir):
   Assert !filereadable("tmp-build/compile_commands.json"), "Compile commands should not be exported by default"
 
 Execute (Find build directory from currently open file):
+  " No cd to proper dir, ensure fallback to from file search
   e test\ project/CMakeLists.txt
-  CMake
-  Assert filereadable("test project/tmp-build/CMakeCache.txt"), "CMakeCache.txt should be generated"
+  CMakeFindBuildDir
+  Assert g:cmake_build_dir == "tmp-build", "CMakeFindBuildDir changed the g:cmake_build_dir variable"
+  Assert exists("b:build_dir"), "Should be able to find dir from open file"
+  "Assert filereadable("test project/tmp-build/CMakeCache.txt"), "CMakeCache.txt should be generated"
 
 Execute (Create symlink to compilation database):
   let g:cmake_export_compile_commands = 1
@@ -71,7 +84,9 @@ Execute (Configure by passing addition arguments to :CMake):
   silent make
 
   enew
-  if has("win32") || has("win32unix")
+  if has("win32")
+    read !"Debug\hello.exe"
+  elseif has("win32unix")
     read !Debug/hello.exe
   else
     read !./hello
