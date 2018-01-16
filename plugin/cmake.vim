@@ -179,10 +179,10 @@ function! s:cmake(...)
     return
   endif
 
-  " the result of fnameescape may contain a trailing '\' character, which will
-  " escpae the '"' after. To avoid this, we substitute \\ with / to normalize
-  " the path.
-  let &makeprg = 'cmake --build "' . substitute(s:fnameescape(b:build_dir), "\\", "/", "g") . '" --target'
+  " CMake outputs errors relative to project directory. We therefore tell
+  let &makeprg = '((echo CMake enter dir: ' . s:fnameescape(b:proj_dir) . ')'
+  let &makeprg .= '&& cmake --build "' . s:fnameescape(b:build_dir) . '" --target $*)'
+  "let &makeprg .= '&& (echo CMake leave dir: ' . s:fnameescape(b:proj_dir) . ')'
   call call('s:cmake_configure', a:000)
 endfunction
 
