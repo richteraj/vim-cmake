@@ -20,24 +20,21 @@ endif
 if !exists("g:cmake_ycm_symlinks")
   let g:cmake_ycm_symlinks = 0
 endif
-if !exists("g:cmake_config_in_quickfix")
-  let g:cmake_config_in_quickfix = 0
-endif
 
 if !executable("cmake")
   echoerr "vim-cmake requires cmake executable. Please make sure it is installed and on PATH."
   finish
 endif
 
-if g:cmake_config_in_quickfix
-  " CMake error rudimentary parsing
-  let s:cmake_errors = []
-  let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
-  let s:cmake_errors += ['CMake %trror at %f:%l:']
-  let s:cmake_errors += ['CMake %trror in %f:']
-  let s:cmake_errors += ['CMake %trror: %m']
-  let &errorformat .= ',' . join(s:cmake_errors, ',')
-endif
+" CMake error rudimentary parsing
+let s:cmake_errors = []
+let s:cmake_errors += ['%DCMake enter dir: %f']
+let s:cmake_errors += ['%XCMake leave dir: %f']
+let s:cmake_errors += ['CMake %trror at %f:%l (%m):']
+let s:cmake_errors += ['CMake %trror at %f:%l:']
+let s:cmake_errors += ['CMake %trror in %f:']
+let s:cmake_errors += ['CMake %trror: %m']
+let &errorformat .= ',' . join(s:cmake_errors, ',')
 
 function! s:find_build_dir()
   " Do not overwrite already found build_dir, may be set explicitly
@@ -57,9 +54,11 @@ function! s:find_build_dir()
   if b:build_dir != ""
     " expand() would expand "" to working directory, but we need
     " this as an indicator that build was not found
-    let b:build_dir = fnamemodify(b:build_dir, ':p')
-    let b:proj_dir = fnamemodify(b:build_dir, ':p:h:h')
+    let b:build_dir = substitute(fnamemodify(b:build_dir, ':p'), "\\", "/", "g")
+    let b:proj_dir = substitute(fnamemodify(b:build_dir, ':p:h:h'), "\\", "/", "g")
     echom "Found cmake build directory: " . s:fnameescape(b:build_dir)
+    echom "Found cmake project directory: " . s:fnameescape(b:proj_dir)
+
     return 1
   else
     echom "Unable to find cmake build directory."
@@ -114,37 +113,26 @@ function! s:cmake_configure(...)
 
   let l:argumentstr = join(l:argument, " ")
 
-  if g:cmake_config_in_quickfix
-    exec 'cd' s:fnameescape(b:proj_dir)
-    let l:mp = &makeprg
+  exec 'cd' s:fnameescape(b:proj_dir)
 
-    " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
-    " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
-    " `build.ninja`.
-    " Those options are internal command line options of CMake and therefore
-    " *undocumented* (working with CMake v3.7.2)
-    let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
-    let s:cmd .= l:argumentstr . ' ' . join(a:000)
-    let &makeprg = s:cmd
+  " This makes use of "cmake -Hproj_dir -Bbuild_dir" as a substitute for
+  " "cmake ..", similar to Ninja's "rebuild_cache.util" command inside
+  " `build.ninja`.
+  " Those options are internal command line options of CMake and therefore
+  " *undocumented* (working with CMake v3.7.2)
+  let s:cmd = 'cmake -H'. s:fnameescape(b:proj_dir) .' -B'. s:fnameescape(b:build_dir) .' '
 
-    echo s:cmd
-    silent make
+  let s:cmd .= l:argumentstr . ' ' . join(a:000)
+  echo s:cmd
+  silent let s:res = system(s:cmd)
+  silent echo s:res
 
-    let &makeprg = l:mp
-    exec 'cd -'
+  exec 'cd -'
 
-    " If there were make errors another buffer might get opened, therefore
-    " setting "b:build_dir" again
-    if !s:find_build_dir()
+  " If there were make errors another buffer might get opened, therefore
+  " setting "b:build_dir" again
+  if !s:find_build_dir()
       return
-    endif
-  else
-    exec 'cd' s:fnameescape(b:build_dir)
-    let s:cmd = 'cmake .. '. l:argumentstr . " " . join(a:000)
-    echo s:cmd
-    silent let s:res = system(s:cmd)
-    silent echo s:res
-    exec 'cd -'
   endif
 
   exec 'cd' s:fnameescape(b:build_dir)
