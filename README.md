@@ -73,8 +73,7 @@ git clone https://github.com/junegunn/vader.vim
 
 # Run tests
 vim -Nu 'test/.vimrc' -c 'Vader! test/cmake.vader'
-vim -Nu 'test/.vimrc' --cmd 'let g:cmake_config_in_quickfix = 1' -c 'Vader! test/cmake_quickfix.vader'
-vim -Nu 'test/.vimrc' --cmd 'let g:cmake_config_in_quickfix = 1' -c 'Vader! test/cmake.vader'
+vim -Nu 'test/.vimrc' -c 'Vader! test/cmake_quickfix.vader'
 ```
 
 For test file syntax highlighting, add vader.vim as a plugin to your .vimrc.
