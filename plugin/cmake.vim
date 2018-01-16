@@ -191,7 +191,10 @@ function! s:cmake(...)
     return
   endif
 
-  let &makeprg = 'cmake --build ' . s:fnameescape(b:build_dir) . ' --target'
+  " the result of fnameescape may contain a trailing '\' character, which will
+  " escpae the '"' after. To avoid this, we substitute \\ with / to normalize
+  " the path.
+  let &makeprg = 'cmake --build "' . substitute(s:fnameescape(b:build_dir), "\\", "/", "g") . '" --target'
   call call('s:cmake_configure', a:000)
 endfunction
 
