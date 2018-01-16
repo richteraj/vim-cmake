@@ -9,11 +9,12 @@ This project was originally forked from [vhdirk/vim-cmake](https://github.com/vh
 
 ### Commands
 
- * `:CMake` searches for the closest directory named build in an upwards search,
-and whenever one is found, it runs the cmake command there, assuming the CMakeLists.txt
-file is just one directory above. Any arguments given to :CMake will be directly passed
-on to the cmake command. It also sets the working directory of the make command, so
-you can just use quickfix as with a normal Makefile project.
+ * `:CMake` searches for the closest directory named as specified by `g:cmake_build_dir`.
+The directory is searched for upwards from the current directory. If that does not lead to a result it tries again from the directory of the current file.
+When a dir is found, it runs the cmake command there, assuming the CMakeLists.txt
+file in `..` relative to the build dir.
+Any arguments given to :CMake will be directly passed on to the cmake command.
+Finally, this command sets `makeprg` to (effectively) `cmake --build <build-dir> --target ` for you to simply compile the project using `:make <target>`.
 
  * `:CMakeClean` deletes all files in the build directory. You can think of this as a CMake version of make clean.
 
@@ -91,7 +92,8 @@ For test file syntax highlighting, add vader.vim as a plugin to your .vimrc.
     * @jmirabel for fixing concatenation of cmake arguments.
     * @T4ng10r for the project generator option.
     * @Squareys for a small overhaul of the project, the initial test and travis setup.
-    * @darth for fixing passing arguments to CMake command
+    * @darth for fixing passing arguments to CMake command.
+    * @richteraj for the initial support for opening configure errors during `:CMake` in the quickfix list.
 
 ## License
 
