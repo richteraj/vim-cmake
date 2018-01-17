@@ -165,7 +165,7 @@ function! s:cmake_configure(...)
 
   " Create symbolic link to compilation database for use with YouCompleteMe
   if g:cmake_ycm_symlinks && filereadable("compile_commands.json")
-    s:create_compile_commands_symlink()
+    call s:create_compile_commands_symlink()
     echom "Created symlink to compilation database"
   endif
 
