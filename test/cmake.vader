@@ -87,7 +87,7 @@ Execute (Configure by passing addition arguments to :CMake):
   silent make
 
   enew
-  if has("win32")
+  if has("win32") || has("win32unix")
     Assert filereadable("Debug/hello.exe"), "Binary of cmake build output not found."
     silent read !Debug/hello.exe
   else
