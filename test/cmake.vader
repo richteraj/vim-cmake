@@ -48,13 +48,14 @@ Execute (Find build directory from currently open file):
   "Assert filereadable("test project/tmp-build/CMakeCache.txt"), "CMakeCache.txt should be generated"
 
 Execute (Create symlink to compilation database):
-  let g:cmake_export_compile_commands = 1
-  let g:cmake_ycm_symlinks = 1
-  cd test\ project
-  CMake
-
   " Exporting compile commands does not work with Visual Studio generator
   if !has("win32") && !has("win32unix")
+    let g:cmake_export_compile_commands = 1
+    let g:cmake_ycm_symlinks = 1
+    cd test\ project
+
+    CMake
+
     Assert filereadable("tmp-build/compile_commands.json"), "Compile commands should be exported"
     Assert filereadable(resolve("compile_commands.json")), "A symlink should be generated"
   endif
@@ -63,14 +64,16 @@ Execute (Open already configured cmake project):
   cd test\ project/tmp-build
   silent !cmake .. -DWITH_BYE=ON
   e ../CMakeLists.txt
-  CMake
+  silent CMake
   silent make
 
   enew
   if has("win32") || has("win32unix")
-    read !Debug/hello.exe
+    Assert filereadable("Debug/hello.exe"), "Binary of cmake build output not found."
+    silent read !Debug/hello.exe
   else
-    read !./hello
+    Assert filereadable("hello"), "Binary of cmake build output not found."
+    silent read !./hello
   endif
 Expect:
 
@@ -85,11 +88,11 @@ Execute (Configure by passing addition arguments to :CMake):
 
   enew
   if has("win32")
-    read !"Debug\hello.exe"
-  elseif has("win32unix")
-    read !Debug/hello.exe
+    Assert filereadable("Debug/hello.exe"), "Binary of cmake build output not found."
+    silent read !Debug/hello.exe
   else
-    read !./hello
+    Assert filereadable("hello"), "Binary of cmake build output not found."
+    silent read !./hello
   endif
 Expect:
 
