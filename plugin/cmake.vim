@@ -45,7 +45,7 @@ function! s:create_compile_commands_symlink()
     if has("win32")
       silent echo system("mklink ../compile_commands.json " . b:build_dir . "/compile_commands.json")
     else
-      silent echo system("ln -s " . b:build_dir ."/compile_commands.json ../compile_commands.json")
+      silent echo system("ln -s " . s:fnameescape(b:build_dir) ."/compile_commands.json ../compile_commands.json")
     endif
 endfunction
 
